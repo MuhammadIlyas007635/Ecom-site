@@ -50,9 +50,4 @@ Route::post('/login', [AuthController::class, 'login']);
 
     Route::middleware('auth:sanctum')->get('/search_product', [ProductController::class, 'search_product']); // for home
 
-     
- 
-
-
-
 
