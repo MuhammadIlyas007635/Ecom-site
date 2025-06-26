@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\OrderController;
+use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\CategoryController;
 
@@ -51,3 +52,4 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth:sanctum')->get('/search_product', [ProductController::class, 'search_product']); // for home
 
 
+    Route::middleware('auth:sanctum')->post('/stripe-post/{totalprice}', [PaymentController::class, 'stripePayment'])->name('stripe.post'); // stripe payment
