@@ -122,7 +122,9 @@ class ProductController extends Controller
     }
 
     public function addToCart(Request $request, $id)
-{
+{  
+
+    // dd($request->all());
     if (Auth::check()) {
         $user = Auth::user();
         $product = Product::find($id);
