@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller; // ✅ Correct import
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -63,4 +64,22 @@ class CategoryController extends Controller
         ], 200);
 
     }
+
+    public function product_by_category($category_id)
+{
+    $category = Category::with('products')->find($category_id);
+
+    if (!$category) {
+        return response()->json([
+            'success' => 404,
+            'message' => 'Category not found',
+        ]);
+    }
+
+    return response()->json([
+        'success' => 200,
+        'message' => 'Products fetched successfully',
+        'data' => $category->products,
+    ]);
+}
 }

@@ -38,6 +38,8 @@ Route::post('/login', [AuthController::class, 'login']);
   
     //     return $request->user();                                                                                                         
     });
+
+     Route::middleware('auth:sanctum')->get('/product_by_category/{category_id}', [CategoryController::class, 'product_by_category']);// for home
        
          Route::middleware('auth:sanctum')->get('/cancel_order/{id}', [OrderController::class, 'cancelOrder']); // home page
     
@@ -48,5 +50,6 @@ Route::post('/login', [AuthController::class, 'login']);
       Route::middleware('auth:sanctum')->post('/cash-order', [ProductController::class, 'cash_order']);
     Route::middleware('auth:sanctum')->get('/product-detail/{id}', [ProductController::class, 'productDetail']); // for home page
 
-    Route::middleware('auth:sanctum')->get('/search_product', [ProductController::class, 'search_product']); // for home
+    Route::middleware('auth:sanctum')->get('/search_product', [ProductController::class, 'search_product']);
+   
     Route::middleware('auth:sanctum')->post('/stripe-post/{totalprice}', [PaymentController::class, 'stripePayment'])->name('stripe.post'); // stripe payment
