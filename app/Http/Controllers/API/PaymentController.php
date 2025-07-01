@@ -19,8 +19,8 @@ class PaymentController extends Controller
 {
     try {
         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
-
-        $amount = intval($totalprice * 100); // Convert to cents
+//    dd($totalprice);
+        $amount = intval($totalprice * 100);
 
         if (!$request->payment_method) {
             return response()->json([
