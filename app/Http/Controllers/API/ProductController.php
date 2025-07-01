@@ -250,7 +250,7 @@ class ProductController extends Controller
         $order->user_id = $cartItem->user_id;
 
         $order->product_title = $cartItem->product_title;
-        $order->price = $cartItem->price;
+        $order->price = $cartItem->price * $cartItem->quantity;
         $order->quantity = $cartItem->quantity;
         $order->image = $cartItem->image;
         $order->product_id = $cartItem->product_id;
