@@ -71,14 +71,14 @@ class ProductController extends Controller
 
    public function update(Request $request, $id)
 {
-    // Find product or return 404
+    // Find product or fail
     $product = Product::findOrFail($id);
 
-    // Validate request
+    // Validate input
     $request->validate([
         'product_title' => 'required|string|max:255',
         'description' => 'required|string',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         'price' => 'required|numeric',
         'quantity' => 'required|integer',
         'category_id' => 'required|integer|exists:categories,id',
@@ -86,29 +86,39 @@ class ProductController extends Controller
     ]);
 
     // Update product fields
-    $product->product_title = $request->product_title;
-    $product->description = $request->description;
+    $product->update([
+        'product_title' => $request->product_title,
+        'description'   => $request->description,
+        'price'         => $request->price,
+        'quantity'      => $request->quantity,
+        'category_id'   => $request->category_id,
+        'discount'      => $request->discount ?? 0,
+    ]);
 
-    // Handle image update
+    // Handle image uploads (append to existing)
     if ($request->hasFile('image')) {
-        $image = $request->file('image');
-        $imagename = time() . '.' . $image->getClientOriginalExtension();
-        $image->move(public_path('product_images'), $imagename);
-        $product->image = $imagename;
+        foreach ($request->file('image') as $index => $imageFile) {
+            $imagename = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+            $imageFile->move(public_path('product_images'), $imagename);
+
+            // Save to ProductImage table
+            ProductImage::create([
+                'product_id' => $product->id,
+                'image'      => $imagename,
+            ]);
+
+            // Optional: set first uploaded image as main product image
+            if ($index === 0 && !$product->image) {
+                $product->image = $imagename;
+                $product->save();
+            }
+        }
     }
 
-    $product->price = $request->price;
-    $product->quantity = $request->quantity;
-    $product->category_id = $request->category_id;
-    $product->discount = $request->discount;
-
-    // Save updates
-    $product->save();
-
     return response()->json([
-        'message' => 'Product updated successfully.',
-        'product' => $product
-    ], 200);
+        'message' => 'Product updated successfully with images.',
+        'product' => $product->load('images')
+    ]);
 }
       public function destroy($id)
 {
@@ -122,7 +132,7 @@ class ProductController extends Controller
 
     }
 
-    public function showProducts()
+    public function products()
     {
         $products = Product::paginate(10);
 
