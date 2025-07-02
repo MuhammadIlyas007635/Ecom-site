@@ -33,6 +33,7 @@ class PaymentController extends Controller
             'amount' => $amount,
             'currency' => 'usd',
             'payment_method' => $request->payment_method,
+            'payment_method_types' => ['card'],
             'confirm' => true,
             'automatic_payment_methods' => [
                 'enabled' => true,

@@ -3,58 +3,70 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Order;
+use App\Models\ProductImage;
 use App\Models\Product;
 use App\Models\Add_To_Cart;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
    public function store(Request $request)
 {
-    $request->validate([
-        'product_title' => 'required|string|max:255',
+    $validator = Validator::make($request->all(), [
+        'product_title' => 'required|string',
         'description' => 'required|string',
-        'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         'price' => 'required|numeric',
-        'quantity' => 'required|integer',
-        'category_id' => 'required|integer|exists:categories,id',
+        'quantity' => 'required|numeric',
+        'category_id' => 'required|exists:categories,id',
         'discount' => 'nullable|numeric',
+        'image.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
     ]);
 
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    // Create Product
     $product = new Product();
     $product->product_title = $request->product_title;
     $product->description = $request->description;
-
-    if ($request->hasFile('image')) {
-        $image = $request->file('image');
-        $imagename = time() . '.' . $image->getClientOriginalExtension();
-        $image->move(public_path('product_images'), $imagename);
-        $product->image = $imagename;
-    }
-
     $product->price = $request->price;
     $product->quantity = $request->quantity;
     $product->category_id = $request->category_id;
-    $product->discount = $request->discount;
-
+    $product->discount = $request->discount ?? 0;
+    $product->image = ''; // Placeholder
     $product->save();
 
+    // Handle images
+    if ($request->hasFile('image')) {
+        foreach ($request->file('image') as $index => $imgFile) {
+            $imagename = time() . '_' . uniqid() . '.' . $imgFile->getClientOriginalExtension();
+            $imgFile->move(public_path('product_images'), $imagename);
+
+            ProductImage::create([
+                'product_id' => $product->id,
+                'image' => $imagename,
+            ]);
+
+            // Save first image as preview
+            if ($index === 0) {
+                $product->image = $imagename;
+                $product->save();
+            }
+        }
+    }
+
     return response()->json([
-        'message' => 'Product added successfully.',
-        'product' => $product
+        'success' => true,
+        'message' => 'Product created successfully',
+        'data' => $product->load('images')
     ], 201);
-}  
-
-   public function products()
-   {
-      $products = Product::paginate(10);
-
-      return response()->json([
-            'success' => true,
-            'data' => $products
-        ], 200);
    }
 
    public function update(Request $request, $id)
@@ -283,7 +295,7 @@ class ProductController extends Controller
 
    public function productDetail($id)
 {
-    $product = Product::find($id);
+    $product = Product::with('images')->findorfail($id);
 
     if (!$product) {
         return response()->json([
