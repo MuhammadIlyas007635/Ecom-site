@@ -191,6 +191,7 @@ class ProductController extends Controller
             $cart->price = $product->discount != null ? $product->discount : $product->price;
             $cart->image = $product->image;
             $cart->product_id = $product->id;
+            $cart->price = $product->price;
 
             $cart->quantity = $requested_quantity;
             $cart->total_price = $cart->quantity * $cart->price;
