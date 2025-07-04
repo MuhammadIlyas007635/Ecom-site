@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -27,6 +28,24 @@ class OrderController extends Controller
         'data' => $orders
     ], 200);
 }    
+
+  public function getUserOrders(Request $request)
+{
+    if (Auth::check()) {
+        $user = Auth::user();
+        $orders = Order::where('user_id', $user->id)->get();
+
+        return response()->json([
+            'success' => true,
+            'orders' => $orders,
+        ], 200);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized. Please login first.'
+        ], 401);
+    }
+}
     
       public function delivered($id)
 {

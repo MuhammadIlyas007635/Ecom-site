@@ -38,7 +38,8 @@ Route::post('/login', [AuthController::class, 'login']);
   
     //     return $request->user();                                                                                                         
     });
-
+     
+    Route::middleware('auth:sanctum')->get('/user-orders', [OrderController::class, 'getUserOrders']);
      Route::middleware('auth:sanctum')->get('/product_by_category/{category_id}', [CategoryController::class, 'product_by_category']);// for home
        
          Route::middleware('auth:sanctum')->get('/cancel_order/{id}', [OrderController::class, 'cancelOrder']); // home page
