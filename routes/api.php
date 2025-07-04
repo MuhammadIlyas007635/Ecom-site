@@ -43,7 +43,7 @@ Route::post('/login', [AuthController::class, 'login']);
        
          Route::middleware('auth:sanctum')->get('/cancel_order/{id}', [OrderController::class, 'cancelOrder']); // home page
     
-     Route::middleware('auth:sanctum')->get('/show_products', [ProductController::class, 'showProducts']); // at the home page 
+     Route::middleware('auth:sanctum')->get('/show_products', [ProductController::class, 'showproducts']); // at the home page 
      Route::middleware('auth:sanctum')->post('/add-to-cart/{id}', [ProductController::class, 'addToCart']);
      Route::middleware('auth:sanctum')->get('/show_cart', [ProductController::class, 'showCart']);
       Route::middleware('auth:sanctum')->delete('/remove_cart/{id}', [ProductController::class, 'remove_cart']);

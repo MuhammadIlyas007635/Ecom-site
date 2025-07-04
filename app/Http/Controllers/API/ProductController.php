@@ -340,4 +340,27 @@ class ProductController extends Controller
         'data' => $products
     ], 200);
 }
+      public function showproducts(Request $request)
+{
+    $searchText = $request->query('search');
+
+    $products = Product::with('category');
+
+    if ($searchText) {
+        $products->where(function ($query) use ($searchText) {
+            $query->where('product_title', 'LIKE', "%$searchText%")
+                  ->orWhere('price', 'LIKE', "%$searchText%")
+                  ->orWhereHas('category', function ($catQuery) use ($searchText) {
+                      $catQuery->where('title', 'LIKE', "%$searchText%");
+                  });
+        });
+    }
+
+    $paginated = $products->paginate(6);
+
+    return response()->json([
+        'success' => true,
+        'data' => $paginated
+    ]);
+}
 }
