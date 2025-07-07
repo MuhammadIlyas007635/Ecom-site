@@ -1,5 +1,7 @@
 <?php
 
+
+
 namespace App\Http\Controllers\API;
 
 use App\Models\Order;
@@ -11,10 +13,11 @@ use App\Http\Controllers\Controller;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 
-class StripePaymentController extends Controller
+class PaymentController extends Controller
 {
     public function stripePayment(Request $request, $totalprice)
     {
+        // dd($request->all(), $totalprice);
         try {
             Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
 
@@ -30,7 +33,7 @@ class StripePaymentController extends Controller
             $paymentIntent = PaymentIntent::create([
                 'amount' => $amount,
                 'currency' => 'usd',
-                'payment_method' => $request->payment_method,
+                 'payment_method' => $request->payment_method,
                 'confirm' => true,
                 'automatic_payment_methods' => [
                     'enabled' => true,
@@ -38,6 +41,7 @@ class StripePaymentController extends Controller
                 ],
             ]);
 
+    //    dd($paymentIntent);
             if ($paymentIntent->status === 'succeeded') {
                 $user = Auth::user();
                 $userId = $user->id;
@@ -80,12 +84,13 @@ class StripePaymentController extends Controller
 
                 // Empty the cart
                 Add_To_Cart::where('user_id', $userId)->delete();
-
+                // dd( $paymentIntent);
                 return response()->json([
                     'success' => true,
                     'message' => 'Payment successful and order placed.',
                     'payment_id' => $paymentIntent->id,
                 ]);
+
             } else {
                 return response()->json([
                     'success' => false,
@@ -100,4 +105,4 @@ class StripePaymentController extends Controller
             ], 500);
         }
     }
-}
+} 
