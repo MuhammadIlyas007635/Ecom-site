@@ -22,6 +22,7 @@ class PaymentController extends Controller
             Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
 
             $amount = intval($totalprice * 100); // cents
+            // dd($amount);
 
             if (!$request->payment_method) {
                 return response()->json([
